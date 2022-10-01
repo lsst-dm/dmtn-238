@@ -159,8 +159,9 @@ datalinker service
 
 The implementation of this service on the datalinker side is conceptually simple.
 It uses the parameters to construct a TAP query, and then returns a redirect to the TAP service sync API to perform that query.
-The main complexity comes from the ``detail`` parameter.
+Because this service is effectively a front end to TAP queries, it is protected by the ``read:tap`` scope.
 
+The main complexity comes from the ``detail`` parameter.
 The purpose of ``detail`` is to allow the user to decide what columns should be included in the query result.
 The three valid values are:
 
