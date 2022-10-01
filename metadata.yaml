@@ -34,17 +34,27 @@ authors:
 # doi: 10.5281/zenodo.#####
 
 # Copyright statement
-copyright: "2022, Association of Universities for Research in Astronomy, Inc. (AURA)"
+copyright: >-
+  2022, Association of Universities for Research in Astronomy, Inc. (AURA)
 
 # Description. A short, 1-2 sentence statemement used by document indices.
-description: "Describes the implementation strategy for using the IVOA DataLink standard to provide helpful views and exploratory queries for RSP TAP queries and the Portal Aspect."
+description: >-
+  Describes the implementation strategy for using the IVOA DataLink standard
+  to provide helpful views and exploratory queries for RSP TAP queries and the
+  Portal Aspect.
 
 # Abstract, if available
-# abstract: >
-#           Write your paragraph
-#           here with multiple lines.
-#
-#           You can have multiple paragraphs too.
+abstract: >
+  The Rubin Science Platform provides an IVOA TAP service that returns
+  structured information about Rubin Observatory data products.  To allow easy
+  user exploration of that data, particularly via the Portal Aspect, we've
+  identified at least three types of information that we may want to associate
+  with the returned records: how to download the image associated with an
+  observation, how to retrieve a cutout of that image, and additional related
+  TAP queries that the user may wish to explore.  We expect to have additional
+  similar use cases in the future.  This tech note describes how we meet those
+  requirements using the IVOA DataLink protocol and the datalinker web
+  service.
 
 # URL where this document is published by Read the Docs. e.g. http://sqr-001.lsst.codes
 url: "https://dmtn-238.lsst.io"
