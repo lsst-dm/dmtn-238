@@ -1,1 +1,3 @@
+diagrams
 documenteer[technote]
+seqdiag
