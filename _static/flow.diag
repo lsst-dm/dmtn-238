@@ -1,0 +1,13 @@
+seqdiag {
+    default_fontsize = 14;
+
+    user -> tap [label = "Image search"]
+    user <- tap [label = "VOtable w/DataLink URL"]
+
+    user -> datalinker [label = "GET Datalink URL"]
+        datalinker => storage [label = "Locate image"]
+    user <- datalinker [label = "Signed 1hr lifetime URL"]
+
+    user -> storage [label = "GET signed 1hr lifetime URL"]
+    user <- storage [label = "Desired image"]
+}
