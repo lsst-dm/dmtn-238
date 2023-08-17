@@ -27,7 +27,7 @@ Here is an example from the Science Platform links service:
 .. literalinclude:: examples/links.xml
    :language: xml
 
-The full URL to the image (a signed GCS URL, see :ref:`links-service`) has been replaced for ``URL`` for brevity.
+The full URL to the image (a signed GCS or S3 URL, see :ref:`links-service`) has been replaced for ``URL`` for brevity.
 
 .. _DALI: https://www.ivoa.net/documents/DALI/
 
@@ -51,7 +51,7 @@ There are two supported ways of linking to the underlying image in a result row 
 .. _ObsCore: https://www.ivoa.net/documents/ObsCore/
 
 Rubin Observatory data sets are restricted to data rights holders by default, so the image links require authentication.
-Given other architectural design constraints of the Rubin Science Platform at the :abbr:`IDF (Interim Data Facility)`, the easiest way to provide an authenticated link to the image is a pre-authenticated Google Cloud Storage link with a short expiration, accessible only via an authenticated query.
+Given other architectural design constraints of the Rubin Science Platform at the :abbr:`IDF (Interim Data Facility)`, the easiest way to provide an authenticated link to the image is a pre-authenticated Google Cloud Storage or S3 link with a short expiration, accessible only via an authenticated query.
 Since these links by necessity change constantly, they cannot be put directly into the database tables underlying the ObsCore schema.
 Using a DataLink links service URL allows storing static links in the underlying database table while still authenticating access to images.
 We therefore use the latter approach.
@@ -61,7 +61,7 @@ Here is the architecture in diagram form:
 .. figure:: /_static/architecture.png
    :name: Links service architecture
 
-   Shows a generic version of the overall architecture with arbitrary storage, which is currently Google Cloud Storage but in the future may be USDF storage using the S3 protocol.
+   Shows a generic version of the overall architecture that can be built on top of Google Cloud Storage or S3 storage.
    Technically, the ingress asks the authentication service for verification and then sends the request directly to the service, but conceptually authentication sits in front of the service as is shown here.
 
 And here is an interaction diagram of the flow involved in retrieving a specific image:
@@ -76,7 +76,7 @@ And here is an interaction diagram of the flow involved in retrieving a specific
 .. _DMTN-234: https://dmtn-234.lsst.io/
 
 In addition to providing a link to the image, we also want to provide pointers to associated services, most notably a SODA_ image cutout service.
-There are two basic ways to do this: return the service descriptor directly with the TAP table, or use a pointer to an external DataLink links service and attach the service 
+There are two basic ways to do this: return the service descriptor directly with the TAP table, or use a pointer to an external DataLink links service and attach the service. 
 Since we are using a DataLink links service anyway, attaching the service descriptor there is simpler and keeps all the metadata about the image together.
 This will allow us, for example, to point a future SIA_ service at the same DataLink links service and thus easily provide the same service descriptors.
 
@@ -93,7 +93,7 @@ We also add a service descriptor to the TAP result indicating that ``access_url`
 .. _Butler: https://arxiv.org/abs/2206.14941
 
 The ``access_url`` goes to a separate service called datalinker_.
-The provided ID is opaque to datalinker; it only passes it to the Butler and asks for the :abbr:`GCS (Google Cloud Storage)` URL for the underlying image.
+The provided ID is opaque to datalinker; it only passes it to the Butler and asks for the storage URL, the URL either pointing to :abbr:`GCS (Google Cloud Storage)` or :abbr:`S3 (Simple Storage Service)` for the underlying image.
 datalinker then creates a signed URL for that image that is valid for an hour and generates a DataLink links response (including any relevant service descriptors, such as the cutout service) to the user.
 
 Because the return from the DataLink links service grants direct access to an image, this route requires ``read:image`` scope.
@@ -127,7 +127,7 @@ The general principle is that any result column can be linked to a service, spec
 The Portal Aspect and other IVOA clients can then prompt the user for the required parameters and construct an access URL for that service.
 
 When that URL is visited, the effect will be to execute a new TAP query and return the result as a new VOTable.
-That VOTable can, in turn, have new service descriptors, allowing the user to follow these service prompts to explore the data if they choose.
+That VOTable can, in turn, have new service descriptors, allowing the user to follow these service prompts to explore the data further if they choose.
 
 Making this all work involves several moving parts.
 
@@ -173,8 +173,8 @@ The Rubin Science Platform TAP service then reads that directory and uses it to 
 
 .. _datalinker-service:
 
-datalinker service
-------------------
+datalinker links configuration
+------------------------------
 
 The implementation of this service on the datalinker side is conceptually simple.
 It uses the parameters to construct a TAP query, and then returns a redirect to the TAP service sync API to perform that query.
@@ -213,13 +213,20 @@ There is not yet a Felis attribute for marking minimal columns, so for the time 
 .. [#] Neither the name nor the definition of minimal columns has been finalized.
        We may change this parameter based on further experience with what sorts of queries users want to perform.
 
+datalinker butler configuration
+-------------------------------
+
+Currently, datalinker calls Butler directly and therefore has to be configured with the storage used by Butler, as well as the PostgreSQL database the Butler uses to find the files in the metadata.  In order for the Butler to connect to the PostgreSQL server, known as a Butler repository, the ``PGUSER`` and ``PGPASSFILES`` must be set.  These are typically loaded from the vault containing the secrets for the environment.
+
+Depending on the environment, the storage for the Butler may be hosted on Google, or a privately hosted S3.  To configure this, first set the ``STORAGE_BACKEND`` to either ``GCS`` or ``S3``.  If ``GCS`` is chosen, set the ``S3_ENDPOINT_URL`` to ``https://storage.googleapis.com`` (the default).  If ``S3`` is chosen, set ``S3_ENDPOINT_URL`` to the base http URL of the private S3 service.  Many of these secrets come from the vault containing the secrets for the environment. 
+
+No matter if GCS or S3 is chosen, these credentials are used to sign the image URLs.
+
+
 Future work
 ===========
 
-- Currently, datalinker calls Butler directly and therefore has to be configured with a Google service account private key and the password to the underlying PostgreSQL database used by Butler.
-  It uses the same service account to sign the image URLs.
-
-  Once client/server Butler (DMTN-176_) is available, datalinker is expected to use it for the query and request a signed URL directly from it rather than signing its own.
+- Once client/server Butler (DMTN-176_) is available, datalinker is expected to use it for the query and request a signed URL directly from it rather than signing its own.
 
 .. _DMTN-176: https://dmtn-176.lsst.io/
 
