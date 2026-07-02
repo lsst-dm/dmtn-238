@@ -126,6 +126,25 @@ Because the return from the DataLink links service grants direct access to an im
 Note that this usefully separates TAP query permissions from image access permissions: the ObsTap query to get metadata requires ``read:tap`` scope, but the user then needs ``read:image`` scope as well to get the underlying image.
 See :dmtn:`235` for more details about authorization scopes.
 
+Rate limiting image downloads
+-----------------------------
+
+To avoid bandwidth starvation and possible egress charges, we want to rate-limit image downloads.
+Requests for large amounts of data should use some other mechanism, such as a bulk transfer service.
+
+Unfortunately, it is difficult to apply rate limiting at the conceptually correct point of the storage backend, since the storage backend only sees a signed URL and does not know the identity of the user.
+It therefore is not in a position to apply per-user limits.
+
+The best location we have to do rate limiting is when providing the signed URL to the user, under the assumption that most signed URLs will be followed.
+This assumption may not be correct, but doing better is architecturally difficult.
+
+The generator of the signed URL is the Butler server, which poses the additional concern that the Butler client used by datalinker to get a signed URL may not correctly handle 429 responses.
+To work around that concern until we have a chance to test end-to-end 429 handling, we apply lower rate limits on the DataLink links service than on Butler, ensuring that users will hit that rate limit first.
+
+Our current mechanism for handling rate limits is fairly coarse and includes all routes for a given service.
+(See :sqr:`073` for more details about rate limiting.)
+However, the APIs that return signed image links are by far the most heavily used APIs on the Butler server, so applying a rate limit to the entirety of the Butler API to restrict signed URLs should be adequate in practice.
+
 Service descriptors
 ===================
 
