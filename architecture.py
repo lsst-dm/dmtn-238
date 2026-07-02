@@ -8,8 +8,6 @@ from diagrams.gcp.network import LoadBalancing
 from diagrams.onprem.client import User
 from diagrams.onprem.compute import Server
 
-os.chdir(os.path.dirname(__file__))
-
 graph_attr = {
     "label": "",
     "labelloc": "bbc",
