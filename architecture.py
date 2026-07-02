@@ -2,7 +2,7 @@
 
 import os
 
-from diagrams import Cluster, Diagram
+from diagrams import Cluster, Diagram, Edge
 from diagrams.gcp.compute import KubernetesEngine
 from diagrams.gcp.network import LoadBalancing
 from diagrams.onprem.client import User
@@ -35,6 +35,7 @@ with Diagram(
         ingress = LoadBalancing("Ingress")
         gafaelfawr = KubernetesEngine("Authentication")
         tap = KubernetesEngine("TAP")
+        butler = KubernetesEngine("Butler")
         datalinker = KubernetesEngine("datalinker")
 
     with Cluster("Data Storage"):
@@ -42,7 +43,7 @@ with Diagram(
         database = Server("Database")
         storage = Server("Object store")
 
-    user >> ingress >> gafaelfawr >> [tap, datalinker]
-    tap >> qserv >> database
-    datalinker >> storage
+    user >> ingress >> gafaelfawr >> [datalinker, tap]
+    datalinker >> butler >> storage
     user >> storage
+    tap >> qserv >> database

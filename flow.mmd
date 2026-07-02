@@ -1,15 +1,18 @@
 sequenceDiagram
   participant user
-  participant TAP
+  participant TAP/SIA
   participant datalinker
+  participant Butler
   participant storage
 
-  user->>+TAP: Image search
-  TAP->>-user: VOTable w/DataLink URL
+  user->>+TAP/SIA: Image search
+  TAP/SIA->>-user: VOTable w/DataLink URL
 
   user->>+datalinker: GET DataLink URL
-  datalinker<<->>storage: Locate image
-  datalinker->>-user: Signed 1hr lifetime URL
+  datalinker->>+Butler: GET signed URL
+  Butler<<->>storage: Locate image
+  Butler->>-datalinker: Signed 1hr lifetime URL
+  datalinker->>-user: DataLink record w/URL
 
   user->>+storage: GET with signed 1hr lifetime URL
   storage->>-user: Desired image
