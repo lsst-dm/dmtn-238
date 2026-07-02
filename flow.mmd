@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant user
+  participant TAP
+  participant datalinker
+  participant storage
+
+  user->>+TAP: Image search
+  TAP->>-user: VOTable w/DataLink URL
+
+  user->>+datalinker: GET DataLink URL
+  datalinker<<->>storage: Locate image
+  datalinker->>-user: Signed 1hr lifetime URL
+
+  user->>+storage: GET with signed 1hr lifetime URL
+  storage->>-user: Desired image

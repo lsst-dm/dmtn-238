@@ -1,0 +1,24 @@
+[technote]
+id = "DMTN-238"
+series_id = "DMTN"
+canonical_url = "https://dmtn-238.lsst.io/"
+github_url = "https://github.com/lsst-dm/dmtn-238"
+github_default_branch = "main"
+date_created = 2022-09-01
+date_updated = 2026-07-01
+organization.name = "Vera C. Rubin Observatory"
+organization.ror = "https://ror.org/048g3cy84"
+license.id = "CC-BY-4.0"
+
+[[technote.authors]]
+name = {given = "Russ", family = "Allbery"}
+internal_id = "allberyr"
+orcid = "https://orcid.org/0009-0009-9491-8923"
+
+[[technote.authors.affiliations]]
+name = "NSF-DOE Vera C. Rubin Observatory / NSF NOIRLab"
+internal_id = "RubinObs"
+ror = "https://ror.org/048g3cy84"
+
+[technote.status]
+state = "stable"

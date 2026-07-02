@@ -1,3 +1,5 @@
 _build/
-_static/*.png
-_static/*.svg
+.technote/
+.tox/
+venv/
+.venv/

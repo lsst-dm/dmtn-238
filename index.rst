@@ -1,4 +1,11 @@
-:tocdepth: 1
+############################################
+RSP DataLink service implementation strategy
+############################################
+
+.. abstract::
+
+   Describes the implementation strategy for using the IVOA DataLink standard to provide helpful views and exploratory queries for RSP TAP queries and the Portal Aspect.
+
 
 Abstract
 ========
@@ -58,29 +65,25 @@ We therefore use the latter approach.
 
 Here is the architecture in diagram form:
 
-.. figure:: /_static/architecture.png
-   :name: Links service architecture
+.. diagrams:: architecture.py
 
-   Shows a generic version of the overall architecture that can be built on top of Google Cloud Storage or S3 storage.
-   Technically, the ingress asks the authentication service for verification and then sends the request directly to the service, but conceptually authentication sits in front of the service as is shown here.
+This is a generic version of the overall architecture that can be built on top of Google Cloud Storage or S3 storage.
+Technically, the ingress asks the authentication service for verification and then sends the request directly to the service, but conceptually authentication sits in front of the service as is shown here.
 
 And here is an interaction diagram of the flow involved in retrieving a specific image:
 
-.. figure:: /_static/flow.svg
-   :name: Image retrieval sequence
+.. mermaid:: ./flow.mmd
+   :caption: Image retrieval sequence
 
-   Sequence of operations for image retrieval.
-   The authentication and authorization check in front of every Science Platform request has been omitted for clarity.
-   See DMTN-234_ for details on authentication and authorization.
-
-.. _DMTN-234: https://dmtn-234.lsst.io/
+The authentication and authorization check in front of every Science Platform request has been omitted for clarity.
+See :dmtn:`234` for details on authentication and authorization.
 
 In addition to providing a link to the image, we also want to provide pointers to associated services, most notably a SODA_ image cutout service.
 There are two basic ways to do this: return the service descriptor directly with the TAP table, or use a pointer to an external DataLink links service and attach the service. 
 Since we are using a DataLink links service anyway, attaching the service descriptor there is simpler and keeps all the metadata about the image together.
 This will allow us, for example, to point a future SIA_ service at the same DataLink links service and thus easily provide the same service descriptors.
 
-.. _SODA: https://ivoa.net/documents/SODA/
+.. _SODA: https://www.ivoa.net/documents/SODA/
 .. _SIA: https://www.ivoa.net/documents/SIA/
 
 Implementation

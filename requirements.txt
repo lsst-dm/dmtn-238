@@ -1,8 +1,2 @@
 diagrams
-documenteer[technote]
-seqdiag
-
-# Dependency of seqdiag
-# Pinned to prevent a build error
-# ERROR: 'ImageDraw' object has no attribute 'textsize'
-pillow==9.5.0
+documenteer[technote]>=2.0,<3
